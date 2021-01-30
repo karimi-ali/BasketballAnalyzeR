@@ -172,6 +172,67 @@ calculate_centralities(net1)
 ```
 
 ```{r}
+data.team <- subset(PbP, team=="GSW" & result!="")
+data.opp <- subset(PbP, team!="GSW" & result!="")
+BasketballAnalyzeR::densityplot(data=data.team, shot.type="2P",
+                                var="periodTime", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.team, shot.type="2P",
+                                var="totalTime", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.team, shot.type="2P",
+                                var="playlength", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.team, shot.type="2P",
+                                var="shot_distance", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.opp, shot.type="2P",
+                                var="periodTime", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.opp, shot.type="2P",
+                                var="totalTime",best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.opp, shot.type="2P",
+                                var="playlength", best.scorer=TRUE)
+BasketballAnalyzeR::densityplot(data=data.opp, shot.type="2P",
+                                var="shot_distance", best.scorer=TRUE)
+```
+```{r}
+# Single player performance
+KD <- subset(PbP, player=="Kevin Durant" & result!="")
+SC <- subset(PbP, player=="Stephen Curry" & result!="")
+BasketballAnalyzeR::densityplot(data=KD, shot.type="field",
+                                var="playlength")
+BasketballAnalyzeR::densityplot(data=KD, shot.type="field",
+                                var="shot_distance")
+BasketballAnalyzeR::densityplot(data=SC, shot.type="field",
+                                var="playlength")
+BasketballAnalyzeR::densityplot(data=SC, shot.type="field",
+                                var="shot_distance")
+```
+```{r}
+# Creating shot charts for different players
+# Adjust coordinates
 
+PbP$xx <- PbP$original_x/10
+PbP$yy <- PbP$original_y/10 - 41.75
+
+# Klay thompson
+KT <- subset(PbP, player=="Klay Thompson")
+shotchart(data=KT, x="xx", y="yy",
+          type="density-polygons")
+shotchart(data=KT, x="xx", y="yy", type="density-raster")
+shotchart(data=KT, x="xx", y="yy", type="density-hexbin")
+
+shotchart(data=KT, x="xx", y="yy",
+          type="density-polygons", scatter=TRUE)
+shotchart(data=KT, x="xx", y="yy", type="density-raster",
+          scatter=TRUE, pt.col="tomato", pt.alpha=0.1)
+shotchart(data=KT, x="xx", y="yy", type="density-hexbin",
+          nbins=50, palette="bwr")
+```
+```{r}
+# Joint density
+data <- subset(Pbox, MIN>=500)
+attach(data)
+X <- data.frame(PTS, P3M, P2M, REB=OREB+DREB, AST)/MIN
+detach(data)
+scatterplot(X, data.var=1:5,
+lower=list(continuous="density"),
+diag=list(continuous="densityDiag"))
 ```
 
