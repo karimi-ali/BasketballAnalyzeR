@@ -1,4 +1,94 @@
 ```{r}
+# k-means clustering
+FF <- fourfactors(Tbox,Obox)
+OD.Rtg <- FF$ORtg/FF$DRtg
+F1.r <- FF$F1.Off/FF$F1.Def
+F2.r <- FF$F2.Def/FF$F2.Off
+F3.Off <- FF$F3.Off
+F3.Def <- FF$F3.Def
+P3M <- Tbox$P3M
+STL.r <- Tbox$STL/Obox$STL
+# Create data frame from all the vars
+data <- data.frame(OD.Rtg, F1.r, F2.r, F3.Off, F3.Def,
+                   P3M, STL.r)
+# Find number of Clusters
+set.seed(29)
+kclu1 <- kclustering(data)
+plot(kclu1)
 
+# clustering second part
+set.seed(29)
+kclu2 <- kclustering(data, labels=Tbox$Team, k=5)
+plot(kclu2)
+```
+```{r}
+# GSW shot clustering
+shots <- subset(PbP,
+                !is.na(PbP$shot_distance) &
+                  PbP$team=="GSW")
+shots <- dplyr::mutate_if(shots, is.factor, droplevels)
+attach(shots)
+data <- data.frame(PTS=points, DIST=shot_distance,
+                   TIMEQ=periodTime, PL=playlength)
+detach(shots)
+set.seed(1)
+kclu1 <- kclustering(data, algorithm="MacQueen",
+                     nclumax=15, iter.max=500)
+plot(kclu1)
+
+set.seed(1)
+kclu2 <- kclustering(data, algorithm="MacQueen",
+                     iter.max=500, k=6)
+plot(kclu2)
+
+```
+```{r}
+# Heirarchical clustering of NBA players
+attach(Pbox)
+data <- data.frame(PTS, P3M, REB=OREB+DREB,
+                   AST, TOV, STL, BLK, PF)
+detach(Pbox)
+# Focus on players with 1500 minutes of play
+data <- subset(data, Pbox$MIN>=1500)
+ID <- Pbox$Player[Pbox$MIN>=1500]
+# cluster decision based on the Variance explained by the clustering
+hclu1 <- hclustering(data)
+plot(hclu1)
+
+# Actual clustering into 9 clusters
+hclu2 <- hclustering(data, labels=ID, k=9)
+plot(hclu2, profiles=TRUE)
+
+plot(hclu2, rect=TRUE, colored.branches=TRUE,
+     cex.labels=0.5)
+
+# Features of the nine clusters
+Pbox.subset <- subset(Pbox, MIN>=1500)
+MIN <- Pbox.subset$MIN
+X <- data.frame(hclu2$Subjects, scale(data), MIN)
+
+dvar <- c("PTS","P3M","REB","AST",
+          "TOV", "STL","BLK","PF")
+svar <- "MIN"
+yRange <- range(X[,dvar])
+sizeRange <- c(1500, 3300)
+no.clu <- 9
+p <- vector(no.clu, mode="list")
+for (k in 1:no.clu) {
+  XC <- subset(X, Cluster==k)
+  vrb <- variability(XC[,3:11], data.var=dvar,
+                     size.var=svar, weight=FALSE,
+                     VC=FALSE)
+  title <- paste("Cluster", k)
+  p[[k]] <- plot(vrb, size.lim=sizeRange, ylim=yRange,
+                 title=title, leg.pos=c(0,1),
+                 leg.just=c(-0.5,0),
+                 leg.box="vertical",
+                 leg.brk=seq(1500,3000,500),
+                 leg.title.pos="left", leg.nrow=1,
+                 max.circle=7)
+}
+library(gridExtra)
+grid.arrange(grobs=p, ncol=3)
 ```
 
