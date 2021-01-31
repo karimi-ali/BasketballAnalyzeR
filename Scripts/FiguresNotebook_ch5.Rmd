@@ -1,4 +1,56 @@
 ```{r}
+# Linear regression between the assists and turn overs
+Pbox.sel <- subset(Pbox, MIN>=500)
+attach(Pbox.sel)
+X <- AST/MIN
+Y <- TOV/MIN
+Pl <- Player
+detach(Pbox.sel)
+out <- simplereg(x=X, y=Y, type="lin")
+xtitle <- "AST per minute"
+ytitle <- "TOV per minute"
+plot(out, xtitle=xtitle, ytitle=ytitle)
 
+plot(out, labels=Pl, subset="quant",
+Lx=0, Ux=0.97, Ly=0, Uy=0.97,
+xtitle=xtitle, ytitle=ytitle)
+```
+```{r}
+# nonparametric regressions
+Pbox.sel <- subset(Pbox, MIN>=500)
+attach(Pbox.sel)
+X <- (DREB+OREB)/MIN
+Y <- P3M/MIN
+Pl <- Player
+detach(Pbox.sel)
+out <- simplereg(x=X, y=Y, type="lin")
+xtitle <- "REB per minute"
+ytitle <- "P3M per minute"
+plot(out, xtitle=xtitle, ytitle=ytitle)
+# LOESS method with polynomials degree 2
+out <- simplereg(x=X, y=Y, type="pol")
+plot(out, labels=Pl, subset="quant",
+Lx=0, Ux=0.90, Ly=0, Uy=0.95,
+xtitle=xtitle, ytitle=ytitle)
+
+# points
+data <- subset(Pbox, MIN>=500)
+attach(data)
+X <- data.frame(PTS, P3M, P2M, REB=OREB+DREB, AST)/MIN
+detach(data)
+scatterplot(X, data.var=1:5,
+lower=list(continuous="smooth_loess"),
+diag=list(continuous="barDiag"))
+```
+```{r}
+# Shooting prob vs. time
+
+PbP.GSW <- subset(PbP, team=="GSW" & result!="")
+ p1 <- scoringprob(data=PbP.GSW, shot.type="3P",
+var="playlength")
+p2 <- scoringprob(data=PbP.GSW, shot.type="3P",
+var="periodTime", bw=300)
+library(gridExtra)
+grid.arrange(p1, p2, ncol=2)
 ```
 
